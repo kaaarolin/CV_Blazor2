@@ -1,0 +1,53 @@
+﻿body {
+    font-family: Times New Roman, Times, serif;
+}
+
+.pink-text {
+    color: lightpink;
+    text-align: center;
+}
+
+.cv-image {
+    width: 250px;
+    height: auto;
+    margin-top: 20px;
+}
+
+.pink-divider {
+    width: 80%;
+    height: 5px;
+    background-color: pink;
+    margin: 80px auto 40px;
+}
+
+.small-table {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+    .small-table th, .small-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .small-table tbody tr:nth-child(even) td {
+        background-color: #f8c8dc;
+    }
+
+.btn-submit {
+    padding: 10px 20px;
+    background-color: white;
+    color: #f8c8dc;
+    border: 2px solid #f8c8dc;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+    .btn-submit:hover {
+        background-color: #f8c8dc;
+        color: white;
+    }

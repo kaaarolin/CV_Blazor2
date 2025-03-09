@@ -1,0 +1,116 @@
+﻿@page "/admin"
+@using CV_Blazor2.Services
+@using CV_Blazor2.Models
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject TechSkillService TechSkillService
+@inject ProjectService ProjectService
+@inject HttpClient Http
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin")]
+
+
+<h3 style="text-align: center;">Admin Page</h3>
+<p style="text-align: center;">Welcome to the admin page!</p>
+
+<AuthorizeView>
+    <Authorized>
+        <p>✅ Inloggad som: @context.User.Identity.Name</p>
+        <p>🔹 Roller: @string.Join(", ", context.User.Claims.Where(c => c.Type == "role").Select(c => c.Value))</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>🚫 Du är inte inloggad eller har inte rättigheter att se denna sida.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+<!-- Tech Skills Section -->
+<div class="section">
+    <h4>Add New Tech Skill</h4>
+    <EditForm Model="@newTechSkill" OnValidSubmit="AddTechSkill">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form">
+            <label for="techSkillName">Skill Name</label>
+            <InputText id="techSkillName" @bind-Value="newTechSkill.Name" class="form-control" />
+
+            <label for="techSkillYears">Years of Experience</label>
+            <InputNumber id="techSkillYears" @bind-Value="newTechSkill.Years" TValue="int" class="form-control" />
+
+            <label for="techSkillLevel">Skill Level (1-10)</label>
+            <InputNumber id="techSkillLevel" @bind-Value="newTechSkill.SkillLevel" TValue="int" class="form-control" />
+
+            <button class="btn-submit" type="submit">Add</button>
+        </div>
+    </EditForm>
+</div>
+
+<!-- Projects Section -->
+<div class="section">
+    <h4>Add New Project</h4>
+    <EditForm Model="@newProject" OnValidSubmit="AddProject">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form">
+            <label for="ProjectName">Project Name</label>
+            <InputText id="ProjectName" @bind-Value="newProject.Name" class="form-control" />
+
+            <label for="Description">Description</label>
+            <InputTextArea id="Description" @bind-Value="newProject.Description" class="form-control" />
+
+            <button class="btn-submit" type="submit">Add</button>
+        </div>
+    </EditForm>
+</div>
+
+<!-- Logout Button -->
+<div style="text-align: center; margin-top: 20px;">
+    <button class="btn-submit" @onclick="Logout">Go back to home page</button>
+</div>
+
+@code {
+    private CV_Blazor2.Models.TechSkill newTechSkill = new();
+    private CV_Blazor2.Models.Project newProject = new();
+
+    private async Task AddTechSkill()
+    {
+        var success = await TechSkillService.AddTechSkillAsync(new CV_Blazor2.Models.TechSkill
+            {
+                Name = newTechSkill.Name,
+                Years = newTechSkill.Years,
+                SkillLevel = newTechSkill.SkillLevel
+            });
+
+
+        if (success)
+        {
+            Console.WriteLine("✅ Tech Skill added!");
+            newTechSkill = new CV_Blazor2.Models.TechSkill { SkillLevel = 1 };
+        }
+        else
+        {
+            Console.WriteLine("❌ Failed to add Tech Skill.");
+        }
+    }
+
+    private async Task AddProject()
+    {
+        var success = await ProjectService.AddProjectAsync(newProject); 
+        if (success)
+        {
+            Console.WriteLine("✅ Project added!");
+            newProject = new CV_Blazor2.Models.Project();
+        }
+        else
+        {
+            Console.WriteLine("❌ Failed to add Project.");
+        }
+    }
+
+    private void Logout()
+    {
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+}

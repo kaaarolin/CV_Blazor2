@@ -1,0 +1,173 @@
+﻿@page "/"
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Home</PageTitle>
+
+<h1 style="text-align: center;">Hi, I'm <span class="pink-text">Karolin</span></h1>
+
+<h4 style="text-align: center;">I'm a .NET Cloud Developer Student</h4>
+
+<div style="text-align: center;">
+    <img src="images/Karolin1.jpg" alt="Karolin's CV Bild" class="cv-image" />
+</div>
+
+<div class="pink-divider"></div>
+
+<h4 style="text-align: center;">About me</h4>
+<p style="text-align: center;">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+    in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+</p>
+
+<div class="pink-divider"></div>
+
+<h4 style="text-align: center;">Tech skills</h4>
+
+@if (!string.IsNullOrEmpty(errorMessageTechSkills))
+{
+    <p style="color: red; text-align: center;">@errorMessageTechSkills</p>
+}
+else if (techSkills == null)
+{
+    <p style="text-align: center;">Laddar Tech Skills...</p>
+}
+else
+{
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Skill</th>
+                <th>Years of experience</th>
+                <th>Level (1 - 10)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var skill in techSkills)
+            {
+                <tr>
+                    <td>@skill.Id</td>
+                    <td>@skill.Name</td>
+                    <td>@skill.Years</td>
+                    <td>@skill.SkillLevel</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div style="margin-bottom: 50px;"></div>
+
+<h4 style="text-align: center;">Projects</h4>
+
+@if (!string.IsNullOrEmpty(errorMessageProjects))
+{
+    <p style="color: red;">@errorMessageProjects</p>
+}
+else if (projects == null)
+{
+    <p>Laddar Projects...</p>
+}
+else
+{
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Project Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in projects)
+            {
+                <tr>
+                    <td>@project.Id</td>
+                    <td>@project.Name</td>
+                    <td>@project.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="pink-divider"></div>
+
+<h3 style="text-align: center;"><span class="pink-text">Connect with me</span></h3>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="https://www.linkedin.com/in/karolin-nguyen-bb5021318/" target="_blank">
+        <img src="images/LinkedIn_logo_initials.png" alt="LinkedIn" style="width: 40px; margin: 10px;">
+    </a>
+
+    <a href="https://github.com/kaaarolin" target="_blank">
+        <img src="images/Octicons-mark-github.svg.png" alt="GitHub" style="width: 40px; margin: 10px;">
+    </a>
+</div>
+
+<div class="pink-divider"></div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/Login" style="padding: 10px; background-color: #f8c8dc; color: white; text-decoration: none; border-radius: 5px;">
+        Log in
+    </a>
+</div>
+
+
+@code {
+    private List<TechSkill>? techSkills;
+    private List<Project>? projects;
+    private string errorMessageTechSkills = "";
+    private string errorMessageProjects = "";
+    private bool IsAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthState(); // Kolla inloggning
+
+        try
+        {
+            techSkills = await Http.GetFromJsonAsync<List<TechSkill>>("https://karolin-cv-api-hfe5feakc9e5gxe8.westeurope-01.azurewebsites.net/Tech-skills");
+        }
+        catch (Exception ex)
+        {
+            errorMessageTechSkills = $"Fel vid hämtning av Tech Skills: {ex.Message}";
+        }
+
+        try
+        {
+            projects = await Http.GetFromJsonAsync<List<Project>>("https://karolin-cv-api-hfe5feakc9e5gxe8.westeurope-01.azurewebsites.net/Projects");
+        }
+        catch (Exception ex)
+        {
+            errorMessageProjects = $"Fel vid hämtning av Projects: {ex.Message}";
+        }
+    }
+
+    private async Task CheckAuthState()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        IsAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+        StateHasChanged(); // Säkerställer att UI uppdateras
+    }
+
+
+    public class TechSkill
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Years { get; set; }
+        public int SkillLevel { get; set; }
+    }
+
+    public class Project
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+}
